@@ -123,7 +123,7 @@ body {
   padding: 4px 10px;
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--bg-dark);
+  color: #fff;
   background: var(--accent-archive-orange);
   border: none;
   border-radius: 4px;
@@ -142,6 +142,14 @@ body:not(.layout-mode-live) .cell-go-archive {
 
 body.layout-mode-live .cell:not(.cell-mode-live) .cell-go-archive {
   display: none;
+}
+
+/* В режиме Live ячейка в индивидуальном Archive — оранжевый бордер */
+body.layout-mode-live .cell:not(.cell-mode-live) {
+  border-color: var(--accent-archive-orange);
+}
+body.layout-mode-live .cell:not(.cell-mode-live).active {
+  box-shadow: 0 0 0 1px var(--accent-archive-orange);
 }
 
 .cell-go-live {
@@ -168,6 +176,11 @@ body.layout-mode-live .cell:not(.cell-mode-live) .cell-go-archive {
 /* В режиме Archive раскладки в ячейках не показываем Go Live */
 body.layout-mode-archive .cell-go-live {
   display: none;
+}
+
+body.layout-mode-archive .cell.active {
+  border-color: var(--accent-archive-orange);
+  box-shadow: 0 0 0 1px var(--accent-archive-orange);
 }
 
 .cell-name {
@@ -236,6 +249,7 @@ body.layout-mode-archive .cell-go-live {
 }
 
 .layout-mode-toggle .toggle-option[data-mode="archive"].active {
+  color: #fff;
   background: var(--accent-archive-orange);
 }
 
