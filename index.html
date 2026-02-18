@@ -72,8 +72,10 @@
 
     <div class="timeline-section">
       <div class="timeline-controls">
-        <button type="button" class="btn-go-live" id="go-live-btn">Go Live</button>
-        <button type="button" class="btn-go-archive-layout" id="go-archive-layout-btn">В архив раскладки</button>
+        <div class="layout-mode-toggle" id="layout-mode-toggle" role="switch" aria-checked="true">
+          <span class="toggle-option" data-mode="live">Live</span>
+          <span class="toggle-option" data-mode="archive">Archive</span>
+        </div>
       </div>
       <div class="timeline" id="timeline">
         <div class="timeline-ruler" id="timeline-ruler"></div>

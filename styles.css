@@ -207,49 +207,35 @@ body.layout-mode-archive .cell-go-live {
   margin-bottom: 12px;
 }
 
-.btn-go-live {
+/* Тогл Live / Archive над таймлайном */
+.layout-mode-toggle {
+  display: inline-flex;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.layout-mode-toggle .toggle-option {
   padding: 8px 16px;
   font-size: 0.875rem;
   font-weight: 600;
+  color: var(--text-muted);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.layout-mode-toggle .toggle-option:hover {
+  color: var(--text-primary);
+}
+
+.layout-mode-toggle .toggle-option.active {
   color: var(--bg-dark);
   background: var(--accent-live);
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
-.btn-go-live:hover {
-  opacity: 0.9;
-}
-
-.btn-go-live:active {
-  transform: scale(0.98);
-}
-
-.btn-go-live:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-go-archive-layout {
-  padding: 8px 16px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--bg-dark);
+.layout-mode-toggle .toggle-option[data-mode="archive"].active {
   background: var(--accent-archive);
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-
-.btn-go-archive-layout:hover {
-  opacity: 0.9;
-}
-
-.btn-go-archive-layout:active {
-  transform: scale(0.98);
 }
 
 /* Timeline */

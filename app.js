@@ -65,6 +65,14 @@ function updateCellStatus(cellId) {
 }
 
 function setActiveCell(cellId) {
+  const prevId = state.activeCellId;
+  // В режиме Live: ячейка, теряющая фокус и бывшая в Archive, возвращается в Live
+  if (state.layoutMode === 'live' && prevId && prevId !== cellId && state.cells[prevId].mode === 'archive') {
+    state.cells[prevId].mode = 'live';
+    state.cells[prevId].position = null;
+    updateCellStatus(prevId);
+  }
+
   document.querySelectorAll('.cell').forEach((el) => el.classList.remove('active'));
   if (cellId) {
     const cell = document.querySelector(`[data-cell-id="${cellId}"]`);
@@ -180,8 +188,8 @@ function handleTimelineClick(e) {
   updateLayoutModeDisplay();
 }
 
-// Go Live над таймлайном: раскладка в Live, все ячейки Live
-function handleGoLive() {
+// Переключение раскладки Live ↔ Archive (тогл над таймлайном)
+function setLayoutModeLive() {
   state.layoutMode = 'live';
   for (let i = 1; i <= CELL_COUNT; i++) {
     state.cells[i].mode = 'live';
@@ -191,10 +199,10 @@ function handleGoLive() {
   setActiveCell(null);
   document.querySelectorAll('.recording-block').forEach((b) => b.classList.remove('active'));
   updateLayoutModeDisplay();
+  updateLayoutModeToggle();
 }
 
-// В архив раскладки: раскладка в Archive, все ячейки на выбранное время (или по умолчанию)
-function handleGoArchiveLayout() {
+function setLayoutModeArchive() {
   state.layoutMode = 'archive';
   const time = DEFAULT_ARCHIVE_TIME;
   for (let i = 1; i <= CELL_COUNT; i++) {
@@ -205,6 +213,25 @@ function handleGoArchiveLayout() {
   setActiveCell(null);
   updateTimelineActiveBlock(time);
   updateLayoutModeDisplay();
+  updateLayoutModeToggle();
+}
+
+function updateLayoutModeToggle() {
+  const toggle = document.getElementById('layout-mode-toggle');
+  if (!toggle) return;
+  toggle.querySelectorAll('.toggle-option').forEach((el) => {
+    el.classList.toggle('active', el.dataset.mode === state.layoutMode);
+  });
+  toggle.setAttribute('aria-checked', state.layoutMode === 'live');
+}
+
+function handleLayoutModeToggle(e) {
+  const option = e.target.closest('.toggle-option');
+  if (!option) return;
+  const mode = option.dataset.mode;
+  if (mode === state.layoutMode) return;
+  if (mode === 'live') setLayoutModeLive();
+  else setLayoutModeArchive();
 }
 
 function init() {
@@ -214,11 +241,11 @@ function init() {
     cell.addEventListener('click', handleCellClick);
   });
 
-  const goLiveBtn = document.getElementById('go-live-btn');
-  if (goLiveBtn) goLiveBtn.addEventListener('click', handleGoLive);
-
-  const goArchiveLayoutBtn = document.getElementById('go-archive-layout-btn');
-  if (goArchiveLayoutBtn) goArchiveLayoutBtn.addEventListener('click', handleGoArchiveLayout);
+  const layoutModeToggle = document.getElementById('layout-mode-toggle');
+  if (layoutModeToggle) {
+    layoutModeToggle.addEventListener('click', handleLayoutModeToggle);
+    updateLayoutModeToggle();
+  }
 
   document.querySelectorAll('.cell-go-live').forEach((btn) => {
     btn.addEventListener('click', handleCellGoLive);
@@ -238,6 +265,7 @@ function init() {
     updateCellStatus(i);
   }
   updateLayoutModeDisplay();
+  updateLayoutModeToggle();
 }
 
 document.addEventListener('DOMContentLoaded', init);
