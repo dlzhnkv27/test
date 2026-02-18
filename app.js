@@ -229,9 +229,12 @@ function handleLayoutModeToggle(e) {
   const option = e.target.closest('.toggle-option');
   if (!option) return;
   const mode = option.dataset.mode;
+  if (mode === 'live') {
+    setLayoutModeLive(); // любой клик на Live переводит все ячейки в Live
+    return;
+  }
   if (mode === state.layoutMode) return;
-  if (mode === 'live') setLayoutModeLive();
-  else setLayoutModeArchive();
+  setLayoutModeArchive();
 }
 
 function init() {
