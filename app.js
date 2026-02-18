@@ -1,14 +1,17 @@
 /**
  * VMS — Интерактивный прототип раскладки камер
- * Глобальный режим раскладки: Live / Archive. Таймлайн — мастер для всех ячеек.
+ * Режим Live: Go Archive в ячейках, таймлайн привязан к активной ячейке, глобальный флаг Live.
+ * Режим Archive: таймлайн — мастер для всех ячеек.
  */
 
 const CELL_COUNT = 4;
 const RECORDINGS_PER_CELL = 12;
 const TOTAL_HOURS = 24;
+const DEFAULT_ARCHIVE_TIME = 3600;
 
 const state = {
   activeCellId: null,
+  layoutMode: 'live', // 'live' | 'archive'
   cells: {},
 };
 
@@ -28,21 +31,15 @@ function formatTime(seconds) {
   return [h, m, s].map(n => n.toString().padStart(2, '0')).join(':');
 }
 
-// Глобальный режим раскладки: Live, если все ячейки в Live; иначе Archive
-function getLayoutMode() {
-  const allLive = Object.values(state.cells).every(
-    (c) => c.mode === 'live'
-  );
-  return allLive ? 'live' : 'archive';
-}
-
-function updateLayoutMode() {
-  const mode = getLayoutMode();
+function updateLayoutModeDisplay() {
+  const mode = state.layoutMode;
   const el = document.getElementById('layout-mode');
   if (el) {
     el.textContent = ' · ' + (mode === 'live' ? 'Live' : 'Archive');
     el.dataset.mode = mode;
   }
+  document.body.classList.toggle('layout-mode-live', mode === 'live');
+  document.body.classList.toggle('layout-mode-archive', mode === 'archive');
 }
 
 function updateCellStatus(cellId) {
@@ -76,7 +73,7 @@ function setActiveCell(cellId) {
   state.activeCellId = cellId;
 }
 
-// Go Live в ячейке: переводит только эту ячейку в Live; если все ячейки стали Live — глобальный режим Live
+// Go Live в ячейке
 function handleCellGoLive(e) {
   e.stopPropagation();
   const btn = e.target.closest('.cell-go-live');
@@ -85,14 +82,29 @@ function handleCellGoLive(e) {
   state.cells[cellId].mode = 'live';
   state.cells[cellId].position = null;
   updateCellStatus(cellId);
-  updateLayoutMode();
+  updateLayoutModeDisplay();
 }
 
-// Клик по ячейке — только выделение
+// Go Archive в ячейке (только в режиме Live): выбранная ячейка переходит в архив, таймлайн привязывается к ней; глобальный флаг остаётся Live
+function handleCellGoArchive(e) {
+  e.stopPropagation();
+  const btn = e.target.closest('.cell-go-archive');
+  if (!btn) return;
+  if (state.layoutMode !== 'live') return;
+  const cellId = parseInt(btn.dataset.cellId, 10);
+  setActiveCell(cellId);
+  state.cells[cellId].mode = 'archive';
+  state.cells[cellId].position = DEFAULT_ARCHIVE_TIME;
+  updateCellStatus(cellId);
+  updateTimelineActiveBlock(DEFAULT_ARCHIVE_TIME);
+  updateLayoutModeDisplay();
+}
+
+// Клик по ячейке — выделение (и при Live не переключаем другие в Live)
 function handleCellClick(e) {
   const cell = e.target.closest('.cell');
   if (!cell) return;
-  if (e.target.closest('.cell-go-live')) return;
+  if (e.target.closest('.cell-go-live') || e.target.closest('.cell-go-archive')) return;
   const cellId = parseInt(cell.dataset.cellId, 10);
   setActiveCell(cellId);
 }
@@ -140,7 +152,7 @@ function createTimelineRecordings() {
   }
 }
 
-// Таймлайн — мастер: клик переключает все ячейки на это время, глобальный режим Archive
+// Клик по таймлайну: в Live — только активная ячейка; в Archive — все ячейки (мастер)
 function handleTimelineClick(e) {
   const block = e.target.closest('.recording-block');
   if (!block) return;
@@ -150,17 +162,27 @@ function handleTimelineClick(e) {
   document.querySelectorAll('.recording-block').forEach((b) => b.classList.remove('active'));
   block.classList.add('active');
 
-  for (let i = 1; i <= CELL_COUNT; i++) {
-    state.cells[i].mode = 'archive';
-    state.cells[i].position = time;
-    updateCellStatus(i);
+  if (state.layoutMode === 'live') {
+    // Таймлайн привязан к активной ячейке; глобальный флаг не меняется
+    if (state.activeCellId) {
+      state.cells[state.activeCellId].mode = 'archive';
+      state.cells[state.activeCellId].position = time;
+      updateCellStatus(state.activeCellId);
+    }
+  } else {
+    for (let i = 1; i <= CELL_COUNT; i++) {
+      state.cells[i].mode = 'archive';
+      state.cells[i].position = time;
+      updateCellStatus(i);
+    }
+    setActiveCell(null);
   }
-  setActiveCell(null);
-  updateLayoutMode();
+  updateLayoutModeDisplay();
 }
 
-// Go Live над таймлайном: все ячейки в Live, глобальный режим Live
+// Go Live над таймлайном: раскладка в Live, все ячейки Live
 function handleGoLive() {
+  state.layoutMode = 'live';
   for (let i = 1; i <= CELL_COUNT; i++) {
     state.cells[i].mode = 'live';
     state.cells[i].position = null;
@@ -168,7 +190,21 @@ function handleGoLive() {
   }
   setActiveCell(null);
   document.querySelectorAll('.recording-block').forEach((b) => b.classList.remove('active'));
-  updateLayoutMode();
+  updateLayoutModeDisplay();
+}
+
+// В архив раскладки: раскладка в Archive, все ячейки на выбранное время (или по умолчанию)
+function handleGoArchiveLayout() {
+  state.layoutMode = 'archive';
+  const time = DEFAULT_ARCHIVE_TIME;
+  for (let i = 1; i <= CELL_COUNT; i++) {
+    state.cells[i].mode = 'archive';
+    state.cells[i].position = time;
+    updateCellStatus(i);
+  }
+  setActiveCell(null);
+  updateTimelineActiveBlock(time);
+  updateLayoutModeDisplay();
 }
 
 function init() {
@@ -181,8 +217,15 @@ function init() {
   const goLiveBtn = document.getElementById('go-live-btn');
   if (goLiveBtn) goLiveBtn.addEventListener('click', handleGoLive);
 
+  const goArchiveLayoutBtn = document.getElementById('go-archive-layout-btn');
+  if (goArchiveLayoutBtn) goArchiveLayoutBtn.addEventListener('click', handleGoArchiveLayout);
+
   document.querySelectorAll('.cell-go-live').forEach((btn) => {
     btn.addEventListener('click', handleCellGoLive);
+  });
+
+  document.querySelectorAll('.cell-go-archive').forEach((btn) => {
+    btn.addEventListener('click', handleCellGoArchive);
   });
 
   createTimelineRuler();
@@ -194,7 +237,7 @@ function init() {
   for (let i = 1; i <= CELL_COUNT; i++) {
     updateCellStatus(i);
   }
-  updateLayoutMode();
+  updateLayoutModeDisplay();
 }
 
 document.addEventListener('DOMContentLoaded', init);
