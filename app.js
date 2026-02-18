@@ -212,7 +212,14 @@ function setLayoutModeLive() {
 
 function setLayoutModeArchive() {
   state.layoutMode = 'archive';
-  const time = DEFAULT_ARCHIVE_TIME;
+  let time = DEFAULT_ARCHIVE_TIME;
+  // В Live при ячейке в индивидуальном архиве — наследуем её время на таймлайне во все ячейки
+  for (let i = 1; i <= CELL_COUNT; i++) {
+    if (state.cells[i].mode === 'archive' && state.cells[i].position != null) {
+      time = state.cells[i].position;
+      break;
+    }
+  }
   for (let i = 1; i <= CELL_COUNT; i++) {
     state.cells[i].mode = 'archive';
     state.cells[i].position = time;
