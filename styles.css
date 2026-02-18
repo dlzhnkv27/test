@@ -164,6 +164,11 @@ body.layout-mode-live .cell:not(.cell-mode-live) .cell-go-archive {
   display: none;
 }
 
+/* В режиме Archive раскладки в ячейках не показываем Go Live */
+body.layout-mode-archive .cell-go-live {
+  display: none;
+}
+
 .cell-name {
   font-size: 0.875rem;
   font-weight: 500;
