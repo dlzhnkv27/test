@@ -10,7 +10,7 @@ const TOTAL_HOURS = 24;
 const DEFAULT_ARCHIVE_TIME = 3600;
 
 const state = {
-  activeCellId: null,
+  activeCellId: 1, // всегда активна какая-то ячейка
   layoutMode: 'live', // 'live' | 'archive'
   cells: {},
 };
@@ -191,7 +191,7 @@ function handleTimelineClick(e) {
       state.cells[i].position = time;
       updateCellStatus(i);
     }
-    setActiveCell(null);
+    // в Archive бордер выбранной ячейки не сбрасывается при клике по таймлайну
   }
   updateLayoutModeDisplay();
 }
@@ -204,13 +204,14 @@ function setLayoutModeLive() {
     state.cells[i].position = null;
     updateCellStatus(i);
   }
-  setActiveCell(null);
+  setActiveCell(state.activeCellId || 1);
   document.querySelectorAll('.recording-block').forEach((b) => b.classList.remove('active'));
   updateLayoutModeDisplay();
   updateLayoutModeToggle();
 }
 
 function setLayoutModeArchive() {
+  const preservedActiveId = state.activeCellId;
   state.layoutMode = 'archive';
   let time = DEFAULT_ARCHIVE_TIME;
   // В Live при ячейке в индивидуальном архиве — наследуем её время на таймлайне во все ячейки
@@ -225,10 +226,15 @@ function setLayoutModeArchive() {
     state.cells[i].position = time;
     updateCellStatus(i);
   }
-  setActiveCell(null);
   updateTimelineActiveBlock(time);
   updateLayoutModeDisplay();
   updateLayoutModeToggle();
+  // всегда активна какая-то ячейка: сохраняем текущую или по умолчанию 1
+  const activeId = preservedActiveId != null ? preservedActiveId : 1;
+  document.querySelectorAll('.cell').forEach((el) => el.classList.remove('active'));
+  const cell = document.querySelector(`[data-cell-id="${activeId}"]`);
+  if (cell) cell.classList.add('active');
+  state.activeCellId = activeId;
 }
 
 function updateLayoutModeToggle() {
@@ -284,6 +290,7 @@ function init() {
   }
   updateLayoutModeDisplay();
   updateLayoutModeToggle();
+  setActiveCell(state.activeCellId);
 }
 
 document.addEventListener('DOMContentLoaded', init);
