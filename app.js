@@ -160,7 +160,7 @@ function createTimelineRecordings() {
   }
 }
 
-// Клик по таймлайну: в Live — только активная ячейка; в Archive — все ячейки (мастер)
+// Клик по таймлайну: в Live — если ячейка уже в архиве, только она; иначе раскладка в Archive и время во всех. В Archive — все ячейки.
 function handleTimelineClick(e) {
   const block = e.target.closest('.recording-block');
   if (!block) return;
@@ -171,11 +171,19 @@ function handleTimelineClick(e) {
   block.classList.add('active');
 
   if (state.layoutMode === 'live') {
-    // Таймлайн привязан к активной ячейке; глобальный флаг не меняется
-    if (state.activeCellId) {
-      state.cells[state.activeCellId].mode = 'archive';
+    const activeCellInArchive = state.activeCellId && state.cells[state.activeCellId].mode === 'archive';
+    if (activeCellInArchive) {
       state.cells[state.activeCellId].position = time;
       updateCellStatus(state.activeCellId);
+    } else {
+      // ни одна ячейка не переведена в архив — клик по таймлайну переводит раскладку в Archive и время во всех
+      state.layoutMode = 'archive';
+      for (let i = 1; i <= CELL_COUNT; i++) {
+        state.cells[i].mode = 'archive';
+        state.cells[i].position = time;
+        updateCellStatus(i);
+      }
+      updateLayoutModeToggle();
     }
   } else {
     for (let i = 1; i <= CELL_COUNT; i++) {
