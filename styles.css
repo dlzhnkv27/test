@@ -44,6 +44,19 @@ body {
   color: var(--text-muted);
 }
 
+.layout-mode {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.layout-mode[data-mode="live"] {
+  color: var(--accent-live);
+}
+
+.layout-mode[data-mode="archive"] {
+  color: var(--accent-archive);
+}
+
 /* Cells grid */
 .cells-grid {
   flex: 1;
@@ -121,33 +134,7 @@ body {
   opacity: 0.9;
 }
 
-.cell-go-archive {
-  padding: 4px 10px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  background: #6e7681;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-}
-
-.cell-go-archive:hover {
-  opacity: 0.9;
-}
-
-/* Go Archive: показываем когда ячейка в режиме Live */
-.cell-go-archive {
-  display: none;
-}
-
-.cell.cell-mode-live .cell-go-archive {
-  display: inline-block;
-}
-
-/* Скрываем кнопки Go Live в ячейках при включённой синхронизации или в режиме Live */
-body.sync-enabled .cell-go-live,
+/* Go Live в ячейке скрыт, когда ячейка уже в Live */
 .cell.cell-mode-live .cell-go-live {
   display: none;
 }
@@ -213,59 +200,6 @@ body.sync-enabled .cell-go-live,
 .btn-go-live:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.toggle-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.toggle-input {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: relative;
-  width: 44px;
-  height: 24px;
-  background: var(--border-default);
-  border-radius: 24px;
-  transition: background 0.2s ease;
-}
-
-.toggle-slider::before {
-  content: '';
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  left: 3px;
-  top: 3px;
-  background: var(--text-primary);
-  border-radius: 50%;
-  transition: transform 0.2s ease;
-}
-
-.toggle-input:checked + .toggle-slider {
-  background: var(--border-active);
-}
-
-.toggle-input:checked + .toggle-slider::before {
-  transform: translateX(20px);
-}
-
-.toggle-text {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-}
-
-.toggle-input:checked ~ .toggle-text {
-  color: var(--text-primary);
 }
 
 /* Timeline */
