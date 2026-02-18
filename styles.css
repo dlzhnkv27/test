@@ -134,8 +134,12 @@ body {
   opacity: 0.9;
 }
 
-/* Go Archive в ячейках показываем только при режиме раскладки Live */
+/* Go Archive в ячейках показываем только при режиме раскладки Live и только если ячейка ещё в Live */
 body:not(.layout-mode-live) .cell-go-archive {
+  display: none;
+}
+
+body.layout-mode-live .cell:not(.cell-mode-live) .cell-go-archive {
   display: none;
 }
 
