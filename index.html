@@ -71,15 +71,25 @@
     </div>
 
     <div class="timeline-section">
-      <div class="timeline-controls">
-        <div class="layout-mode-toggle" id="layout-mode-toggle" role="switch" aria-checked="true">
-          <span class="toggle-option" data-mode="live">Live</span>
-          <span class="toggle-option" data-mode="archive">Archive</span>
-        </div>
+      <div class="timeline-header">
+        <button type="button" class="timeline-collapse-btn" id="timeline-collapse-btn">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="timeline-collapse-label">Свернуть таймлайн</span>
+        </button>
       </div>
-      <div class="timeline" id="timeline">
-        <div class="timeline-ruler" id="timeline-ruler"></div>
-        <div class="timeline-recordings" id="timeline-recordings"></div>
+      <div class="timeline-body" id="timeline-body">
+        <div class="timeline" id="timeline">
+          <div class="timeline-ruler" id="timeline-ruler"></div>
+          <div class="timeline-recordings" id="timeline-recordings"></div>
+        </div>
+        <div class="timeline-footer">
+          <div class="layout-mode-toggle" id="layout-mode-toggle" role="switch" aria-checked="true">
+            <span class="toggle-option" data-mode="live">Live</span>
+            <span class="toggle-option" data-mode="archive">Archive</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>

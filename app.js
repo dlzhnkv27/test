@@ -33,10 +33,16 @@ function formatTime(seconds) {
 
 function updateLayoutModeDisplay() {
   const mode = state.layoutMode;
+  const isMixed = mode === 'live' && Object.values(state.cells).some((c) => c.mode === 'archive');
   const el = document.getElementById('layout-mode');
   if (el) {
-    el.textContent = ' · ' + (mode === 'live' ? 'Live' : 'Archive');
-    el.dataset.mode = mode;
+    if (isMixed) {
+      el.textContent = ' · Mixed Mode';
+      el.dataset.mode = 'mixed';
+    } else {
+      el.textContent = ' · ' + (mode === 'live' ? 'Live' : 'Archive');
+      el.dataset.mode = mode;
+    }
   }
   document.body.classList.toggle('layout-mode-live', mode === 'live');
   document.body.classList.toggle('layout-mode-archive', mode === 'archive');
@@ -65,14 +71,6 @@ function updateCellStatus(cellId) {
 }
 
 function setActiveCell(cellId) {
-  const prevId = state.activeCellId;
-  // В режиме Live: ячейка, теряющая фокус и бывшая в Archive, возвращается в Live
-  if (state.layoutMode === 'live' && prevId && prevId !== cellId && state.cells[prevId].mode === 'archive') {
-    state.cells[prevId].mode = 'live';
-    state.cells[prevId].position = null;
-    updateCellStatus(prevId);
-  }
-
   document.querySelectorAll('.cell').forEach((el) => el.classList.remove('active'));
   if (cellId) {
     const cell = document.querySelector(`[data-cell-id="${cellId}"]`);
@@ -91,6 +89,7 @@ function handleCellGoLive(e) {
   state.cells[cellId].position = null;
   updateCellStatus(cellId);
   updateLayoutModeDisplay();
+  updateLayoutModeToggle();
 }
 
 // Go Archive в ячейке (только в режиме Live): выбранная ячейка переходит в архив, таймлайн привязывается к ней; глобальный флаг остаётся Live
@@ -106,6 +105,7 @@ function handleCellGoArchive(e) {
   updateCellStatus(cellId);
   updateTimelineActiveBlock(DEFAULT_ARCHIVE_TIME);
   updateLayoutModeDisplay();
+  updateLayoutModeToggle();
 }
 
 // Клик по ячейке — выделение (и при Live не переключаем другие в Live)
@@ -171,12 +171,17 @@ function handleTimelineClick(e) {
   block.classList.add('active');
 
   if (state.layoutMode === 'live') {
-    const activeCellInArchive = state.activeCellId && state.cells[state.activeCellId].mode === 'archive';
-    if (activeCellInArchive) {
-      state.cells[state.activeCellId].position = time;
-      updateCellStatus(state.activeCellId);
+    const anyCellInArchive = Object.values(state.cells).some((c) => c.mode === 'archive');
+    if (anyCellInArchive) {
+      // обновляем время у всех ячеек в индивидуальном архиве синхронно
+      for (let i = 1; i <= CELL_COUNT; i++) {
+        if (state.cells[i].mode === 'archive') {
+          state.cells[i].position = time;
+          updateCellStatus(i);
+        }
+      }
     } else {
-      // ни одна ячейка не переведена в архив — клик по таймлайну переводит раскладку в Archive и время во всех
+      // ни одна ячейка не в архиве — переводим раскладку в Archive и время во всех
       state.layoutMode = 'archive';
       for (let i = 1; i <= CELL_COUNT; i++) {
         state.cells[i].mode = 'archive';
@@ -240,8 +245,9 @@ function setLayoutModeArchive() {
 function updateLayoutModeToggle() {
   const toggle = document.getElementById('layout-mode-toggle');
   if (!toggle) return;
+  const isMixed = state.layoutMode === 'live' && Object.values(state.cells).some((c) => c.mode === 'archive');
   toggle.querySelectorAll('.toggle-option').forEach((el) => {
-    el.classList.toggle('active', el.dataset.mode === state.layoutMode);
+    el.classList.toggle('active', !isMixed && el.dataset.mode === state.layoutMode);
   });
   toggle.setAttribute('aria-checked', state.layoutMode === 'live');
 }
@@ -284,6 +290,17 @@ function init() {
 
   const timeline = document.getElementById('timeline-recordings');
   if (timeline) timeline.addEventListener('click', handleTimelineClick);
+
+  const collapseBtn = document.getElementById('timeline-collapse-btn');
+  if (collapseBtn) {
+    const collapseLabel = collapseBtn.querySelector('.timeline-collapse-label');
+    collapseBtn.addEventListener('click', () => {
+      const section = collapseBtn.closest('.timeline-section');
+      if (!section) return;
+      const isCollapsed = section.classList.toggle('collapsed');
+      if (collapseLabel) collapseLabel.textContent = isCollapsed ? 'Раскрыть таймлайн' : 'Свернуть таймлайн';
+    });
+  }
 
   for (let i = 1; i <= CELL_COUNT; i++) {
     updateCellStatus(i);
