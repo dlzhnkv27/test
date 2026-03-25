@@ -96,6 +96,8 @@ function handleCellGoLive(e) {
   state.cells[cellId].mode = 'live';
   state.cells[cellId].position = null;
   updateCellStatus(cellId);
+  const anyArchive = Object.values(state.cells).some((c) => c.mode === 'archive');
+  if (!anyArchive) state.playback.playing = true;
   updateLayoutModeDisplay();
   updateLayoutModeToggle();
   updatePlaybackControls();
@@ -381,7 +383,8 @@ function startCanvasTicker() {
       const cell = state.cells[i];
       if (!cell) continue;
       if (cell.mode === 'live') {
-        if (state.playback.playing) {
+        const anyArchive = Object.values(state.cells).some((c) => c.mode === 'archive');
+        if (state.playback.playing || anyArchive) {
           if (frame % 3 === 0) updateBlobs(i);
           updateSpeckles(i);
           renderFrame(i);
@@ -443,9 +446,10 @@ function updatePlaybackControls() {
   const speedEl = document.getElementById('pb-speed-btn');
   if (speedEl) speedEl.textContent = `x${state.playback.speed}`;
 
+  const anyArchive = Object.values(state.cells).some((c) => c.mode === 'archive');
   document.body.classList.toggle(
     'live-paused',
-    state.layoutMode === 'live' && !state.playback.playing
+    state.layoutMode === 'live' && !anyArchive && !state.playback.playing
   );
 }
 
