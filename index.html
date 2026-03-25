@@ -89,6 +89,54 @@
             <span class="toggle-option" data-mode="live">Live</span>
             <span class="toggle-option" data-mode="archive">Archive</span>
           </div>
+
+          <div class="playback-controls" id="playback-controls">
+            <div class="pb-live-controls">
+              <button class="pb-pause-btn" id="pb-pause-live" type="button" data-tooltip="Пауза"></button>
+              <span class="pb-time-text" id="pb-time-live">00:00:00</span>
+              <span class="pb-live-pill">Live</span>
+            </div>
+            <div class="pb-archive-controls">
+              <button class="pb-seek-btn" id="pb-seek-back" type="button" data-tooltip="−5 секунд">
+                <span class="pb-seek-wrap">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="1 4 1 10 7 10"/>
+                    <path d="M3.51 15a9 9 0 1 0 .49-3.62"/>
+                  </svg>
+                  <span class="pb-seek-num">5</span>
+                </span>
+              </button>
+              <button class="pb-pause-btn" id="pb-pause-archive" type="button" data-tooltip="Пауза"></button>
+              <div class="pb-time-block">
+                <span class="pb-time-text" id="pb-time-archive">00:00:00</span>
+                <span class="pb-date-text" id="pb-date-archive">00/00</span>
+              </div>
+              <button class="pb-seek-btn" id="pb-seek-fwd" type="button" data-tooltip="+5 секунд">
+                <span class="pb-seek-wrap">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"/>
+                    <path d="M20.49 15a9 9 0 1 1-.49-3.62"/>
+                  </svg>
+                  <span class="pb-seek-num">5</span>
+                </span>
+              </button>
+              <button class="pb-speed-btn" id="pb-speed-btn" type="button" data-tooltip="Скорость воспроизведения">x1</button>
+              <div class="pb-frame-controls">
+                <button class="pb-frame-btn" id="pb-frame-back" type="button" data-tooltip="Предыдущий кадр">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <rect x="2" y="2" width="2.5" height="12" rx="1"/>
+                    <polygon points="13,2 5.5,8 13,14"/>
+                  </svg>
+                </button>
+                <button class="pb-frame-btn" id="pb-frame-fwd" type="button" data-tooltip="Следующий кадр">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <polygon points="3,2 10.5,8 3,14"/>
+                    <rect x="11.5" y="2" width="2.5" height="12" rx="1"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
